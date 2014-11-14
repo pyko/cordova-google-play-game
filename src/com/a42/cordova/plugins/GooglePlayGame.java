@@ -44,6 +44,7 @@ public class GooglePlayGame extends CordovaPlugin implements GameHelperListener 
     private static final String ACTION_AUTH = "auth";
     private static final String ACTION_SIGN_OUT = "signOut";
     private static final String ACTION_IS_SIGNEDIN = "isSignedIn";
+    private static final String ACTION_USER_CANCELLED_SIGNIN = "userCancelledAutoSignIn";
 
     private static final String ACTION_SUBMIT_SCORE = "submitScore";
     private static final String ACTION_SHOW_ALL_LEADERBOARDS = "showAllLeaderboards";
@@ -107,6 +108,8 @@ public class GooglePlayGame extends CordovaPlugin implements GameHelperListener 
             executeSignOut(callbackContext);
         } else if (ACTION_IS_SIGNEDIN.equals(action)) {
             executeIsSignedIn(callbackContext);
+        } else if (ACTION_USER_CANCELLED_SIGNIN.equals(action)) {
+            executeUserCancelledAutoSignIn(callbackContext);
         } else if (ACTION_SUBMIT_SCORE.equals(action)) {
             executeSubmitScore(options, callbackContext);
         } else if (ACTION_SHOW_ALL_LEADERBOARDS.equals(action)) {
@@ -165,6 +168,25 @@ public class GooglePlayGame extends CordovaPlugin implements GameHelperListener 
                     Log.w(LOGTAG, "executeIsSignedIn: unable to determine if user is signed in or not", e);
                     callbackContext.error("executeIsSignedIn: unable to determine if user is signed in or not");
                 }
+            }
+        });
+    }
+
+    private void executeUserCancelledAutoSignIn(final CallbackContext callbackContext) {
+        Log.d(LOGTAG, "executeUserCancelledAutoSignIn");
+        cordova.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    boolean hasCancelled = gameHelper.getSignInCancellations() > 0;
+
+                    JSONObject result = new JSONObject();
+                    result.put("hasCancelled", hasCancelled);
+                    callbackContext.success(result);
+                } catch (JSONException e) {
+                    Log.w(LOGTAG, "executeUserCancelledAutoSignIn: unable to determine if user cancelled auto sign in", e);
+                    callbackContext.error("executeUserCancelledAutoSignIn: unable to determine if user cancelled auto sign in");
+                };
             }
         });
     }
